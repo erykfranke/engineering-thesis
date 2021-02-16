@@ -1,6 +1,7 @@
 export interface GpsModel {
     gps: {
         data: {
+            id: number;
             latitude: number;
             longitude: number;
             created_at: string;

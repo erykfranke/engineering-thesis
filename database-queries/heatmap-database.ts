@@ -1,10 +1,10 @@
 import * as moment from 'moment';
 import * as pg from 'pg';
-import {ChunkModel} from "./models/chunk.model";
-import {TimeChunkModel} from "./models/time-chunk.model";
-import {TimeChunksDisabilitiesModel} from "./models/time-chunks-disabilities.model";
+import {ChunkModel} from "../models/chunk.model";
+import {TimeChunkModel} from "../models/time-chunk.model";
+import {TimeChunksDisabilitiesModel} from "../models/time-chunks-disabilities.model";
 
-export class DataBase {
+export class HeatmapDatabase {
 
     private pool: pg.Pool;
     constructor(config: pg.PoolConfig) {
