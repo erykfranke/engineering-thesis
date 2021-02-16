@@ -10,7 +10,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-const port = 3000;
+const PORT = 3000;
+const GPS_FREQUENCY_LOADING = 43200000;
 let LAST_GPS_ID = 0;
 
 const heatmapDatabase = new HeatmapDatabase({
@@ -27,8 +28,8 @@ const globalDataBase = new GlobalDatabase( {
 })
 
 
-app.listen(port, async () => {
-    console.log(`Server is listening at http://localhost:${port}`);
+app.listen(PORT, async () => {
+    console.log(`Server is listening at http://localhost:${PORT}`);
     loadGps();
 });
 
@@ -66,5 +67,5 @@ function loadGps() {
             LAST_GPS_ID = response.gps.data[response.gps.data.length - 1].id;
         }
         loadGps();
-    }, 2000)
+    }, GPS_FREQUENCY_LOADING)
 }
