@@ -7,6 +7,7 @@ import {calcChunkSize, indexToPosition, positionToIndex} from "./utils/converter
 import {ChunkModel} from "./models/chunk.model";
 import {LatLngModel} from "./models/lat-lng.model";
 import {GpsModel} from "./models/gps.model";
+import {GlobalDatabase} from "./database-queries/global-database";
 
 const app = express();
 app.use(bodyParser.json());
@@ -20,16 +21,10 @@ const dataBase = new DataBase({
     port: 5432,
 });
 
-const options = {
+const globalDataBase = new GlobalDatabase( {
     host: 'server437671.nazwa.pl',
-    path: '/api/gps?with-user-disability=1&page=0&pagination=1000',
-    method: 'GET',
-    headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer xuyR6D1kgai15WstR01CwyBljcZt1J4StGsNMeoU',
-        'Accept': 'application/json'
-    }
-};
+    authorizationKey: 'Bearer xuyR6D1kgai15WstR01CwyBljcZt1J4StGsNMeoU'
+})
 
 const port = 3000;
 app.listen(port, async () => {
@@ -137,35 +132,6 @@ function calcIndexRange(index, mergeSize): { start: number, end: number } {
         end = -(end + 1);
     }
     return {start, end}
-}
-
-function getGps(page: number, lastTimestamp): Promise<GpsModel> {
-    return new Promise((resolve, reject) => {
-        let path = `/api/gps?with-user-disability=1&page=${page}&pagination=1000`;
-        if (lastTimestamp) {
-            path += `&created-at[from]=${new Date(lastTimestamp)}`
-        }
-        const httpReq = http.request({
-            host: 'server437671.nazwa.pl',
-            path,
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer xuyR6D1kgai15WstR01CwyBljcZt1J4StGsNMeoU',
-                'Accept': 'application/json'
-            }
-        }, function (response) {
-            let str = '';
-            response.on('data', function (chunk) {
-                str += chunk;
-            });
-            response.on('end', function () {
-                const json = JSON.parse(str);
-                resolve(json);
-            });
-        });
-        httpReq.end();
-    });
 }
 
 function loadGps() {
