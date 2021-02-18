@@ -1,10 +1,11 @@
 import {LatLngModel} from "../models/lat-lng.model";
 
+const SINGLE_CHUNK_SIZE = 10;
+const MAX_ZOOM = 18;
 const CENTER_LAT = 51.77676585777656;
 const CENTER_LNG = 19.489204287528995;
 const R = 6371000;
 const d = Math.PI / 180;
-const SINGLE_CHUNK_SIZE = 10;
 
 export function positionToIndex(lat: number, lng: number, size = SINGLE_CHUNK_SIZE): {latIndex: number, lngIndex: number} {
     const latR = (size / R) / d;
@@ -29,23 +30,5 @@ export function indexToPosition(latIndex: number, lngIndex: number, size = SINGL
 }
 
 export function calcChunkSize(mapZoom: number): number {
-    switch (mapZoom) {
-        case 18:
-            return 1;
-        case 17:
-            return 2;
-        case 16:
-            return 4;
-        case 15:
-            return 8;
-        case 14:
-            return 16;
-        case 13:
-            return 32;
-        case 12:
-            return 64;
-        case 11:
-        default:
-            return 65;
-    }
+    return Math.pow(2, (MAX_ZOOM - mapZoom)) * SINGLE_CHUNK_SIZE;
 }
