@@ -37,10 +37,8 @@ app.get('/chunks', async (req: express.Request, res: express.Response) => {
     const {latIndex: southWestLatIndex, lngIndex: southWestLngIndex} = positionToIndex(Number(req.query.southWestLat), Number(req.query.southWestLng));
     const hourRange = req.query.hourRange.toString().split(',');
     const dateRange = req.query.dateRange.toString().split(',');
-    const disabilitiesIds = req.query.disabilities.toString().split(',');
-
-    const chunks = await heatmapDatabase.getChunks(southWestLatIndex, northEastLatIndex, southWestLngIndex, northEastLngIndex, hourRange, dateRange, disabilitiesIds);
-
+    const disabilitiesIds =req.query.disabilities.toString().split(',') ;
+    const chunks =  req.query.disabilities.length !== 0 ? await heatmapDatabase.getChunks(southWestLatIndex, northEastLatIndex, southWestLngIndex, northEastLngIndex, hourRange, dateRange, disabilitiesIds) : [];
     res.send(chunkPreprocessing(chunks, Number(req.query.zoom)))
 });
 
@@ -50,13 +48,12 @@ function loadGps() {
         const lastGpsId = await heatmapDatabase.getVariableValue('last_gps_id');
         do {
             try {
-                console.log('PAGE', currentPage)
                 response = await globalDataBase.getGps(currentPage++, Number(lastGpsId));
                 if (response.gps.data.length === 0) break;
                 lastPage = response.gps.last_page;
                 for (const data of response.gps.data) {
                     for (const disability of data.disabilities) {
-                        const [latIndex, lngIndex] = positionToIndex(data.latitude, data.longitude);
+                        const {latIndex, lngIndex} = positionToIndex(data.latitude, data.longitude);
                         await heatmapDatabase.addChunk(latIndex, lngIndex, new Date(data.created_at).getTime(), disability.id);
                     }
                 }
@@ -65,7 +62,7 @@ function loadGps() {
             }
         } while (currentPage <= lastPage);
         if (response.gps.data.length !== 0) {
-            await heatmapDatabase.updateVariableValue('last_gps_id' ,response.gps.data[response.gps.data.length - 1].id);
+            await heatmapDatabase.updateVariableValue('last_gps_id', response.gps.data[response.gps.data.length - 1].id);
         }
         loadGps();
     }, GPS_FREQUENCY_LOADING)

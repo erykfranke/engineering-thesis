@@ -23,7 +23,7 @@ export class HeatmapDatabase {
                 AND (c.lng_index BETWEEN ${southWestLngIndex - 1} AND ${northEastLngIndex + 1})
                 AND (tc.hour BETWEEN B'${Number(hourRange[0]).toString(2).padStart(5, '0')}' AND B'${Number(hourRange[1]).toString(2).padStart(5, '0')}')
                 AND (tc.date BETWEEN '${moment(Number(dateRange[0])).format('YYYY-MM-DD')}' AND '${moment(Number(dateRange[1])).format('YYYY-MM-DD')}')
-                AND (tcd.disability_id = ${disabilitiesIds.join(' OR tcd.disability_id = ')})
+                ${disabilitiesIds.length !== 0 ? `AND (tcd.disability_id = ${disabilitiesIds.join(' OR tcd.disability_id = ')})` : ``}
                 AND c.id = tc.chunk_id
                 AND tc.id = tcd.time_chunk_id
                 GROUP BY c.id`
