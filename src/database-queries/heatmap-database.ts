@@ -20,7 +20,7 @@ export class HeatmapDatabase {
                 SELECT c.id, c.lat_index, c.lng_index, SUM(tcd.count) as count
                 FROM chunk as c, time_chunk as tc, time_chunk_disabilities as tcd
                 WHERE (c.lat_index BETWEEN ${southWestLatIndex - 1} AND ${northEastLatIndex + 1})
-                AND (c.lng_index BETWEEN ${southWestLngIndex - 10} AND ${northEastLngIndex + 10})
+                AND (c.lng_index BETWEEN ${southWestLngIndex - 1} AND ${northEastLngIndex + 1})
                 AND (tc.hour BETWEEN B'${Number(hourRange[0]).toString(2).padStart(5, '0')}' AND B'${Number(hourRange[1]).toString(2).padStart(5, '0')}')
                 AND (tc.date BETWEEN '${moment(Number(dateRange[0])).format('YYYY-MM-DD')}' AND '${moment(Number(dateRange[1])).format('YYYY-MM-DD')}')
                 AND (tcd.disability_id = ${disabilitiesIds.join(' OR tcd.disability_id = ')})
@@ -35,7 +35,6 @@ export class HeatmapDatabase {
     }
 
     async addChunk(chunkLatIndex: number, chunkLngIndex: number, timestamp: number, disabilityId: number): Promise<void> {
-        console.log()
         let chunkId = await this.getChunkId(chunkLatIndex, chunkLngIndex);
         if (chunkId === null) {
             chunkId = await this.insertChunk(chunkLatIndex, chunkLngIndex);
@@ -44,7 +43,7 @@ export class HeatmapDatabase {
         } else {
             const timeChunk = await this.getNewestTimeChunk(chunkId);
             if (moment(timeChunk.date).format('YYYY-MM-DD') === moment(timestamp).format('YYYY-MM-DD')
-                && moment(timestamp).hour().toString(2) === timeChunk.hour
+                && moment(timestamp).hour().toString(2).padStart(5, '0') === timeChunk.hour
             ) {
                 const timeChunksDisabilities = await this.getTimeChunksKDisabilities(timeChunk.id, disabilityId);
                 if (timeChunksDisabilities) {
@@ -53,7 +52,8 @@ export class HeatmapDatabase {
                     await this.insertTimeChunksKDisabilities(timeChunk.id, disabilityId);
                 }
             } else {
-                await this.insertTimeChunksKDisabilities(timeChunk.id, disabilityId);
+                const timeChunkId = await this.insertTimeChunk(chunkId, timestamp);
+                await this.insertTimeChunksKDisabilities(timeChunk.id, timeChunkId);
             }
         }
     }
@@ -153,6 +153,43 @@ export class HeatmapDatabase {
                 WHERE id=${id}
             `);
             return response.rows.length === 0 ? null : response.rows[0].id;
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    async updateVariableValue(name: string, gpsId: number): Promise<void> {
+        try {
+            await this.pool.query(`
+                UPDATE variables
+                SET value='${gpsId}'
+                WHERE name='${name}'
+            `)
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    async getVariableValue(name: string): Promise<string> {
+        let response;
+        try {
+            response = await this.pool.query(`
+                SELECT value
+                FROM variables
+                WHERE name='${name}'
+            `);
+            return response.rows[0].value;
+        }  catch (err) {
+            console.log(err);
+        }
+    }
+
+    async InsertVariable(name: string, value: string): Promise<void> {
+        try {
+            await this.pool.query(`
+                INSERT INTO variables (name, value)
+                VALUES ('${name}', '${value}')
+            `);
         } catch (err) {
             console.log(err);
         }

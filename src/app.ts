@@ -12,7 +12,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const PORT = 3000;
 const GPS_FREQUENCY_LOADING = 43200000;
-let LAST_GPS_ID = 0;
 
 const heatmapDatabase = new HeatmapDatabase({
     user: 'postgres',
@@ -48,23 +47,25 @@ app.get('/', async (req: express.Request, res: express.Response) => {
 function loadGps() {
     setTimeout(async () => {
         let currentPage = 1, lastPage: number, response: GpsModel;
+        const lastGpsId = await heatmapDatabase.getVariableValue('last_gps_id');
         do {
             try {
-                response = await globalDataBase.getGps(currentPage++, LAST_GPS_ID);
+                console.log('PAGE', currentPage)
+                response = await globalDataBase.getGps(currentPage++, Number(lastGpsId));
                 if (response.gps.data.length === 0) break;
                 lastPage = response.gps.last_page;
-                response.gps.data.forEach(data => {
-                    data.disabilities.forEach(disability => {
+                for (const data of response.gps.data) {
+                    for (const disability of data.disabilities) {
                         const [latIndex, lngIndex] = positionToIndex(data.latitude, data.longitude);
-                        // heatmapDatabase.addChunk(latIndex, lngIndex, new Date(data.created_at).getTime(), disability.id);
-                    })
-                })
+                        await heatmapDatabase.addChunk(latIndex, lngIndex, new Date(data.created_at).getTime(), disability.id);
+                    }
+                }
             } catch (err) {
                 console.log("ERROR", err);
             }
         } while (currentPage <= lastPage);
         if (response.gps.data.length !== 0) {
-            LAST_GPS_ID = response.gps.data[response.gps.data.length - 1].id;
+            await heatmapDatabase.updateVariableValue('last_gps_id' ,response.gps.data[response.gps.data.length - 1].id);
         }
         loadGps();
     }, GPS_FREQUENCY_LOADING)
