@@ -1,4 +1,4 @@
-import {PositionChunkModel} from "./position-chunk.model";
+import {PositionChunkModel} from './position-chunk.model';
 
 export interface PreprocessedChunkModel {
     chunks: PositionChunkModel[];

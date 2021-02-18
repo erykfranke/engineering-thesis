@@ -30,5 +30,5 @@ export function indexToPosition(latIndex: number, lngIndex: number, size = SINGL
 }
 
 export function calcChunkSize(mapZoom: number): number {
-    return Math.pow(2, (MAX_ZOOM - mapZoom)) * SINGLE_CHUNK_SIZE;
+    return Math.pow(2, (MAX_ZOOM - mapZoom ));
 }

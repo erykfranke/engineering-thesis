@@ -17,7 +17,7 @@ const heatmapDatabase = new HeatmapDatabase({
     user: 'postgres',
     host: 'localhost',
     database: 'heatmap',
-    password: '12Lisar34',
+    password: 'admin',
     port: 5432,
 });
 
