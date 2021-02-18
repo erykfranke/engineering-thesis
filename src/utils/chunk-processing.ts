@@ -1,6 +1,8 @@
 import {ChunkModel} from "../models/chunk.model";
 import {calcChunkSize, indexToPosition} from "./converter";
 import {LatLngModel} from "../models/lat-lng.model";
+import {PositionChunkModel} from "../models/position-chunk.model";
+import {PreprocessedChunkModel} from "../models/preprocessed-chunk.model";
 
 export function chunkPreprocessing(chunks: ChunkModel[], mapZoom: number) {
     const mergeSize = calcChunkSize(mapZoom);
@@ -11,8 +13,8 @@ export function chunkPreprocessing(chunks: ChunkModel[], mapZoom: number) {
     }
 }
 
-export function singleChunkPreparation(chunks: ChunkModel[]) {
-    const preparedChunks = [];
+export function singleChunkPreparation(chunks: ChunkModel[]): PreprocessedChunkModel {
+    const preparedChunks: PositionChunkModel[] = [];
     let maxCount = 0;
     chunks.forEach((chunk) => {
         const chunkPosition = indexToPosition(chunk.lat_index, chunk.lng_index);
@@ -31,9 +33,9 @@ export function singleChunkPreparation(chunks: ChunkModel[]) {
     };
 }
 
-export function mergeChunks(chunkBeforeMerge: ChunkModel[], mergeSize: number) {
+export function mergeChunks(chunkBeforeMerge: ChunkModel[], mergeSize: number): PreprocessedChunkModel {
     let maxCount = 0;
-    const mergedChunks = [];
+    const mergedChunks: PositionChunkModel[] = [];
     while (chunkBeforeMerge.length !== 0) {
         const chunk = chunkBeforeMerge[0];
         const newChunkIndexesRange = calcNewMergedChunksIndexes(chunk, mergeSize);

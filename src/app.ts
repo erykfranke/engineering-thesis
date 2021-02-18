@@ -32,9 +32,9 @@ app.listen(PORT, async () => {
     loadGps();
 });
 
-app.get('/', async (req: express.Request, res: express.Response) => {
-    const [northEastLatIndex, northEastLngIndex] = positionToIndex(Number(req.query.northEastLat), Number(req.query.northEastLng));
-    const [southWestLatIndex, southWestLngIndex] = positionToIndex(Number(req.query.southWestLat), Number(req.query.southWestLng));
+app.get('/chunks', async (req: express.Request, res: express.Response) => {
+    const {latIndex: northEastLatIndex, lngIndex: northEastLngIndex} = positionToIndex(Number(req.query.northEastLat), Number(req.query.northEastLng));
+    const {latIndex: southWestLatIndex, lngIndex: southWestLngIndex} = positionToIndex(Number(req.query.southWestLat), Number(req.query.southWestLng));
     const hourRange = req.query.hourRange.toString().split(',');
     const dateRange = req.query.dateRange.toString().split(',');
     const disabilitiesIds = req.query.disabilities.toString().split(',');
