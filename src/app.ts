@@ -5,25 +5,31 @@ import {positionToIndex} from "./utils/converter";
 import {GpsModel} from "./models/gps.model";
 import {GlobalDatabase} from "./database-queries/global-database";
 import {chunkPreprocessing} from "./utils/chunk-processing";
+import * as pg from 'pg';
+
+require('dotenv').config()
 
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 const PORT = 3000;
-const GPS_FREQUENCY_LOADING = 43200000;
-
+const GPS_FREQUENCY_LOADING = 2000;
+console.log(process.env.DB_HOST)
 const heatmapDatabase = new HeatmapDatabase({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'heatmap',
-    password: 'admin',
-    port: 5432,
-});
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: Number(process.env.DB_PORT),
+    ssl: {
+        rejectUnauthorized: false
+    }
+} as pg.PoolConfig);
 
 const globalDataBase = new GlobalDatabase( {
-    host: 'server437671.nazwa.pl',
-    authorizationKey: 'Bearer xuyR6D1kgai15WstR01CwyBljcZt1J4StGsNMeoU'
+    host: process.env.API_HOST,
+    authorizationKey: `Bearer ${process.env.API_AUTHORIZATION}`
 })
 
 
