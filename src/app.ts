@@ -13,9 +13,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const GPS_FREQUENCY_LOADING = 2000;
-console.log(process.env.DB_HOST)
 const heatmapDatabase = new HeatmapDatabase({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
