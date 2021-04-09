@@ -57,7 +57,7 @@ export function mergeChunks(chunkBeforeMerge: ChunkModel[], mergeSize: number): 
         let countSum = chunkToMerge.reduce((previousValue, currentValue) => {
             return previousValue + Number(currentValue.count);
         }, 0);
-        countSum /= Math.pow(mergeSize, 2);
+
         if (maxCount < countSum) {
             maxCount = countSum;
         }
