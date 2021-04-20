@@ -1,7 +1,7 @@
 import * as express from 'express'
 import * as bodyParser from 'body-parser'
 import {HeatmapDatabase} from "./database-queries/heatmap-database";
-import {positionToIndex} from "./utils/converter";
+import {Converter} from "./utils/converter";
 import {GpsModel} from "./models/gps.model";
 import {GlobalDatabase} from "./database-queries/global-database";
 import {chunkPreprocessing} from "./utils/chunk-processing";
@@ -40,8 +40,8 @@ app.listen(PORT, async () => {
 });
 
 app.get('/chunks', async (req: express.Request, res: express.Response) => {
-    const {latIndex: northEastLatIndex, lngIndex: northEastLngIndex} = positionToIndex(Number(req.query.northEastLat), Number(req.query.northEastLng));
-    const {latIndex: southWestLatIndex, lngIndex: southWestLngIndex} = positionToIndex(Number(req.query.southWestLat), Number(req.query.southWestLng));
+    const {latIndex: northEastLatIndex, lngIndex: northEastLngIndex} = Converter.positionToIndex(Number(req.query.northEastLat), Number(req.query.northEastLng));
+    const {latIndex: southWestLatIndex, lngIndex: southWestLngIndex} = Converter.positionToIndex(Number(req.query.southWestLat), Number(req.query.southWestLng));
     const hourRange = req.query.hourRange.toString().split(',');
     const dateRange = req.query.dateRange.toString().split(',');
     const disabilitiesIds =req.query.disabilities.toString().split(',') ;
@@ -60,7 +60,7 @@ function loadGps() {
                 lastPage = response.gps.last_page;
                 for (const data of response.gps.data) {
                     for (const disability of data.disabilities) {
-                        const {latIndex, lngIndex} = positionToIndex(data.latitude, data.longitude);
+                        const {latIndex, lngIndex} = Converter.positionToIndex(data.latitude, data.longitude);
                         await heatmapDatabase.addChunk(latIndex, lngIndex, new Date(data.created_at).getTime(), disability.id);
                     }
                 }
