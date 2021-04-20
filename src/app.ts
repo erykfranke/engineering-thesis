@@ -4,7 +4,7 @@ import {HeatmapDatabase} from "./database-queries/heatmap-database";
 import {Converter} from "./utils/converter";
 import {GpsModel} from "./models/gps.model";
 import {GlobalDatabase} from "./database-queries/global-database";
-import {chunkPreprocessing} from "./utils/chunk-processing";
+import {ChunkPreprocessing} from "./utils/chunk-processing";
 import * as cors from "cors"
 import * as pg from 'pg';
 
@@ -46,7 +46,7 @@ app.get('/chunks', async (req: express.Request, res: express.Response) => {
     const dateRange = req.query.dateRange.toString().split(',');
     const disabilitiesIds =req.query.disabilities.toString().split(',') ;
     const chunks =  req.query.disabilities.length !== 0 ? await heatmapDatabase.getChunks(southWestLatIndex, northEastLatIndex, southWestLngIndex, northEastLngIndex, hourRange, dateRange, disabilitiesIds) : [];
-    res.send(chunkPreprocessing(chunks, Number(req.query.zoom)))
+    res.send(ChunkPreprocessing.preprocess(chunks, Number(req.query.zoom)))
 });
 
 function loadGps() {
